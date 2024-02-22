@@ -1,11 +1,9 @@
 <?php
 
+require("./connection.php");
+
 class Book {
     protected $contactsList = [];
-
-//    public function __construct($contactsList) {
-//        $this->contactsList =$contactsList;
-//    }
 
     public function getContacts () {
         foreach ($this->contactsList as $contact) {
@@ -18,12 +16,38 @@ class Book {
         }
     }
 
-    public function addContact(Contact $contact) {
-        array_push($this->contactsList, $contact);
+    public function addContact($name, $number) {
+        $contact = new Contact($name, $number);
+        $sqlAddContact = "INSERT INTO book (name, number)
+                          VALUES  ('{$contact->contactName}','{$contact->contactNumber}')";
+        mysqli_query($connection, $sqlAddContact);
+        $this->message("{$contact->contactName} Written Successfully!");
     }
 
-    public function deleteContact ($contactId) {
+    public function deleteContact($contactId) {
 
+
+
+        $isFounded = false;
+        foreach ($this->contactsList as $key => $contact) {
+            if ($contact->contactName == $contactId || $contact->contactNumber == $contactId) {
+                unset($this->contactsList[$key]);
+                $isFounded = true;
+                $this->message("{$contact->contactName} Deleted Successfully!");
+            }
+        }
+
+        if ($isFounded == false) {
+            $this->message("Deleting failed... not Found!");
+        }
+    }
+
+    private function message ($message) {
+        echo <<<EOT
+                
+                   {$message}
+                    
+                EOT;
     }
 }
 
@@ -57,6 +81,11 @@ $alice = new Contact("Alice", "+79183116162");
 $andrew = new Contact("Andrew", "+79298305848");
 $book = new Book();
 
-$book->addContact($alice);
-$book->addContact($andrew);
+
+$book->addContact("Alice", "+79183116162");
+$book->addContact("Andrew", "+79298305848");
+$book->addContact("Lilith", "+79283339533");
 $book->getContacts();
+$book->deleteContact("Alice");
+$book->getContacts();
+$book->deleteContact("Alicess");
